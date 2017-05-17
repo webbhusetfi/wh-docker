@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
@@ -6,7 +6,7 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         apache2-mpm-event \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* 2>/dev/null
+    && rm -rf /var/lib/apt/lists/* 2>/dev/null \
     \
     && mkdir /var/lock/apache2 /var/run/apache2 \
     && a2dismod -f alias auth_basic authn_file authn_core autoindex dir negotiation > /dev/null \
