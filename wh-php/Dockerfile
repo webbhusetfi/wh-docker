@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
@@ -21,7 +21,7 @@ RUN apt-get update \
         "php${PHP_VERSION}-mysql" \
         "php${PHP_VERSION}-xml" \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* 2>/dev/null
+    && rm -rf /var/lib/apt/lists/* 2>/dev/null \
     \
     && mkdir /run/php \
     && sed -i \
