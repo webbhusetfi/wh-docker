@@ -2,6 +2,8 @@ FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
+ARG HOSTNAME="host"
+
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         apache2-mpm-event \
@@ -47,7 +49,7 @@ RUN apt-get update \
     && echo '<FilesMatch "^\.ph(p[3457]?|t|tml|ps)$">' >> /etc/apache2/sites-enabled/000-default.conf \
     && echo '    Require all denied' >> /etc/apache2/sites-enabled/000-default.conf \
     && echo '</FilesMatch>' >> /etc/apache2/sites-enabled/000-default.conf \
-    && echo 'IncludeOptional /var/www/data/etc/apache2.conf' >> /etc/apache2/sites-enabled/000-default.conf \
+    && echo 'IncludeOptional /var/www/'"$HOSTNAME"'/conf/apache2.conf' >> /etc/apache2/sites-enabled/000-default.conf \
     \
     && echo '#!/bin/bash' > /usr/local/sbin/run.sh \
     && echo "rm -r /var/run/apache2/apache2.pid 2>/dev/null" >> /usr/local/sbin/run.sh \
