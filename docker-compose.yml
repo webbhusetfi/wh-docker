@@ -1,0 +1,26 @@
+version: "3"
+services:
+    wh-php:
+        build: wh-php
+        image: wh-php
+        environment:
+            - FPM_HOST=0.0.0.0
+        extra_hosts:
+            - "wh-db:${DB_HOST}"
+        volumes:
+            - ${HOST_PATH}:/var/www/host
+            - ${LIB_PATH}:/var/www/lib
+    wh-nginx:
+        build: wh-nginx
+        image: wh-nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ${HOST_PATH}:/var/www/host
+            - ${LIB_PATH}:/var/www/lib
+networks:
+    default:
+        ipam:
+            config:
+                - subnet: ${SUBNET}
