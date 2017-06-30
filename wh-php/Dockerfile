@@ -57,10 +57,18 @@ RUN apt-get update \
             "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
     && echo 'include=/var/www/'"$HOSTNAME"'/conf/php-fpm.conf' >> "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
     \
-    && echo '#!/bin/bash' > /usr/local/sbin/run.sh \
-    && echo "rm -r /run/php/fpm.pid 2>/dev/null" >> /usr/local/sbin/run.sh \
-    && echo "exec php-fpm${PHP_VERSION} -F" >> /usr/local/sbin/run.sh \
-    && chmod +x /usr/local/sbin/run.sh
+    && echo '#!/bin/bash' > /usr/local/sbin/run-php-fpm.sh \
+    && echo "if [ ! -d /var/www/$HOSTNAME/conf ]; then" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "    mkdir -p /var/www/$HOSTNAME/conf" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "if [ ! -f /var/www/$HOSTNAME/conf/php-fpm.conf ]; then" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "    touch /var/www/$HOSTNAME/conf/php-fpm.conf" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "if [ ! -f /var/www/$HOSTNAME/conf/msmtprc ]; then" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "    touch /var/www/$HOSTNAME/conf/msmtprc" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo "exec php-fpm${PHP_VERSION} -F" >> /usr/local/sbin/run-php-fpm.sh \
+    && chmod +x /usr/local/sbin/run-php-fpm.sh
 
 ENV PHP_MAX_EXECUTION_TIME=30 \
     PHP_MAX_INPUT_TIME=60 \
@@ -78,4 +86,4 @@ ENV PHP_MAX_EXECUTION_TIME=30 \
     FPM_PM_MAX_SPARE_SERVERS=3
 
 EXPOSE ${FPM_PORT}
-CMD ["/usr/local/sbin/run.sh"]
+CMD ["run-php-fpm.sh"]
