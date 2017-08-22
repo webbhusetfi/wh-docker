@@ -2,10 +2,7 @@ FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
-ARG HOSTNAME="host"
 ARG PHP_VERSION="7.1"
-ARG PHP_USER_ID="1000"
-ARG PHP_GROUP_ID="1000"
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
@@ -34,56 +31,76 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
     \
     && mkdir /run/php \
-    && sed -i \
-            -e 's|^;\{0,1\}sendmail_path =.*$|sendmail_path = "/usr/bin/msmtp -C /var/www/'"$HOSTNAME"'/conf/msmtprc -t"|' \
-            -e 's|^;\{0,1\}max_execution_time =.*$|max_execution_time = ${PHP_MAX_EXECUTION_TIME}|' \
-            -e 's|^;\{0,1\}max_input_time =.*$|max_input_time = ${PHP_MAX_INPUT_TIME}|' \
-            -e 's|^;\{0,1\}memory_limit =.*$|memory_limit = ${PHP_MEMORY_LIMIT}|' \
-            -e 's|^;\{0,1\}post_max_size =.*$|post_max_size = ${PHP_POST_MAX_SIZE}|' \
-            -e 's|^;\{0,1\}upload_max_filesize =.*$|upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE}|' \
-            "/etc/php/${PHP_VERSION}/fpm/php.ini" \
-    && sed -i \
-            -e 's|^;\{0,1\}error_log =.*$|error_log = /proc/self/fd/2|' \
-            "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
-    && sed -i \
-            -e 's/^;\{0,1\}catch_workers_output =.*$/catch_workers_output = yes/' \
-            -e 's/^;\{0,1\}security\.limit_extensions =.*$/security.limit_extensions = .php/' \
-            -e 's/^;\{0,1\}listen =.*$/listen = ${FPM_HOST}:${FPM_PORT}/' \
-            -e 's/^;\{0,1\}pm =.*$/pm = ${FPM_PM}/' \
-            -e 's/^;\{0,1\}pm.max_children =.*$/pm.max_children = ${FPM_PM_MAX_CHILDREN}/' \
-            -e 's/^;\{0,1\}pm.start_servers =.*$/pm.start_servers = ${FPM_PM_START_SERVERS}/' \
-            -e 's/^;\{0,1\}pm.min_spare_servers =.*$/pm.min_spare_servers = ${FPM_PM_MIN_SPARE_SERVERS}/' \
-            -e 's/^;\{0,1\}pm.max_spare_servers =.*$/pm.max_spare_servers = ${FPM_PM_MAX_SPARE_SERVERS}/' \
-            "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
-    && echo 'include=/var/www/'"$HOSTNAME"'/conf/php-fpm.conf' >> "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
+    && sed -i -e 's|^;\{0,1\}error_log =.*$|error_log = /proc/self/fd/2|' "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
+    && echo 'include=/var/www/${HOSTNAME}/conf/php-fpm.conf' >> "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
     \
     && echo '#!/bin/bash' > /usr/local/sbin/run-php-fpm.sh \
-    && echo "if [ ! -d /var/www/$HOSTNAME/conf ]; then" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "    mkdir -p /var/www/$HOSTNAME/conf" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "if [ ! -f /var/www/$HOSTNAME/conf/php-fpm.conf ]; then" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "    touch /var/www/$HOSTNAME/conf/php-fpm.conf" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "if [ ! -f /var/www/$HOSTNAME/conf/msmtprc ]; then" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "    touch /var/www/$HOSTNAME/conf/msmtprc" >> /usr/local/sbin/run-php-fpm.sh \
-    && echo "fi" >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -d /var/www/${HOSTNAME}/conf ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    mkdir -p /var/www/${HOSTNAME}/conf' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -s /var/www/${HOSTNAME}/conf/php-fpm.conf ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    cat <<EOT >> /var/www/${HOSTNAME}/conf/php-fpm.conf' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'user = ${USER_ID}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'group = ${GROUP_ID}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'listen = ${FPM_HOST}:${FPM_PORT}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'listen.allowed_clients = ${FPM_LISTEN_ALLOWED_CLIENTS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'catch_workers_output = ${FPM_CATCH_WORKER_OUTPUT}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'security.limit_extensions = ${FPM_SECURITY_LIMIT_EXTENSIONS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm = ${FPM_PM}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.start_servers = ${FPM_PM_START_SERVERS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.max_children = ${FPM_PM_MAX_CHILDREN}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.min_spare_servers = ${FPM_PM_MIN_SPARE_SERVERS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.max_spare_servers = ${FPM_PM_MAX_SPARE_SERVERS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.max_requests = ${FPM_PM_MAX_REQUESTS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'pm.status_path = ${FPM_PM_STATUS_PATH}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[memory_limit] = ${PHP_MEMORY_LIMIT}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[max_execution_time] = ${PHP_MAX_EXECUTION_TIME}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[max_input_time] = ${PHP_MAX_INPUT_TIME}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[post_max_size] = ${PHP_POST_MAX_SIZE}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[upload_max_filesize] = ${PHP_UPLOAD_MAX_FILESIZE}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_flag[display_errors] = ${PHP_DISPLAY_ERRORS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_flag[log_errors] = ${PHP_LOG_ERRORS}' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[sendmail_path] = /usr/bin/msmtp -C /var/www/${HOSTNAME}/conf/msmtprc -t -i' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'EOT' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -f /var/www/${HOSTNAME}/conf/msmtprc ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    touch /var/www/${HOSTNAME}/conf/msmtprc' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
     && echo "exec php-fpm${PHP_VERSION} -F" >> /usr/local/sbin/run-php-fpm.sh \
     && chmod +x /usr/local/sbin/run-php-fpm.sh
 
-ENV PHP_MAX_EXECUTION_TIME=30 \
+ENV HOSTNAME=default \
+    USER_ID=www-data \
+    GROUP_ID=www-data \
+    \
+    FPM_HOST=0.0.0.0 \
+    FPM_PORT=9000 \
+    FPM_LISTEN_ALLOWED_CLIENTS= \
+    FPM_CATCH_WORKER_OUTPUT=yes \
+    FPM_SECURITY_LIMIT_EXTENSIONS=.php \
+    \
+    FPM_PM=dynamic \
+    FPM_PM_START_SERVERS=1 \
+    FPM_PM_MAX_CHILDREN=5 \
+    FPM_PM_MIN_SPARE_SERVERS=1 \
+    FPM_PM_MAX_SPARE_SERVERS=2 \
+    FPM_PM_MAX_REQUESTS=1000 \
+    FPM_PM_STATUS_PATH=/fpm-status \
+    \
+    PHP_MAX_EXECUTION_TIME=30 \
     PHP_MAX_INPUT_TIME=60 \
     PHP_MEMORY_LIMIT=64M \
     PHP_POST_MAX_SIZE=10M \
     PHP_UPLOAD_MAX_FILESIZE=10M \
-    PHP_DISPLAY_ERRORS=Off \
     \
-    FPM_HOST=127.0.0.1 \
-    FPM_PORT=9000 \
-    FPM_PM=dynamic \
-    FPM_PM_MAX_CHILDREN=5 \
-    FPM_PM_START_SERVERS=2 \
-    FPM_PM_MIN_SPARE_SERVERS=1 \
-    FPM_PM_MAX_SPARE_SERVERS=3
+    PHP_DISPLAY_ERRORS=Off \
+    PHP_LOG_ERRORS=On
 
 EXPOSE ${FPM_PORT}
 CMD ["run-php-fpm.sh"]

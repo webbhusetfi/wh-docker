@@ -2,8 +2,6 @@ FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
-ARG HOSTNAME="host"
-
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         apache2-mpm-event \
@@ -18,8 +16,8 @@ RUN apt-get update \
     && sed -i \
             -e 's/${APACHE_LOCK_DIR}/\/var\/lock\/apache2/' \
             -e 's/${APACHE_PID_FILE}/\/var\/run\/apache2\/apache2.pid/' \
-            -e 's/${APACHE_RUN_USER}/www-data/' \
-            -e 's/${APACHE_RUN_GROUP}/www-data/' \
+            -e 's/${APACHE_RUN_USER}/${USER_ID}/' \
+            -e 's/${APACHE_RUN_GROUP}/${GROUP_ID}/' \
             -e 's/^ErrorLog .*$/ErrorLog \/proc\/self\/fd\/2/' \
             -e '/^ErrorLog .*$/a CustomLog /proc/self/fd/1 combined' \
             "/etc/apache2/apache2.conf" \
@@ -49,21 +47,26 @@ RUN apt-get update \
     && echo '<FilesMatch "^\.ph(p[3457]?|t|tml|ps)$">' >> /etc/apache2/sites-enabled/000-default.conf \
     && echo '    Require all denied' >> /etc/apache2/sites-enabled/000-default.conf \
     && echo '</FilesMatch>' >> /etc/apache2/sites-enabled/000-default.conf \
-    && echo 'IncludeOptional /var/www/'"$HOSTNAME"'/conf/apache2.conf' >> /etc/apache2/sites-enabled/000-default.conf \
+    && echo 'IncludeOptional /var/www/${HOSTNAME}/conf/apache2.conf' >> /etc/apache2/sites-enabled/000-default.conf \
     \
     && echo '#!/bin/bash' > /usr/local/sbin/run.sh \
     && echo "rm -r /var/run/apache2/apache2.pid 2>/dev/null" >> /usr/local/sbin/run.sh \
     && echo "exec apache2 -D FOREGROUND" >> /usr/local/sbin/run.sh \
     && chmod +x /usr/local/sbin/run.sh
 
-ENV APACHE_START_SERVERS=2 \
+ENV HOSTNAME=default \
+    USER_ID=www-data \
+    GROUP_ID=www-data \
+    \
+    APACHE_START_SERVERS=2 \
     APACHE_MIN_SPARE_SERVERS=25 \
     APACHE_MAX_SPARE_SERVERS=75 \
     APACHE_THREADLIMIT=64 \
     APACHE_THREADS_PER_CHILD=25 \
     APACHE_MAX_REQUEST_WORKERS=150 \
     APACHE_MAX_CONNECTIONS_PER_CHILD=0 \
-    APACHE_FPM_HOST=127.0.0.1 \
+    \
+    APACHE_FPM_HOST=wh-php \
     APACHE_FPM_PORT=9000
 
 EXPOSE 80
