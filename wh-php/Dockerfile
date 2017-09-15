@@ -11,7 +11,7 @@ RUN apt-get update \
         curl \
     && curl -fSL "https://packages.sury.org/php/apt.gpg" -o "/etc/apt/trusted.gpg.d/php.gpg" \
     && echo "deb https://packages.sury.org/php/ jessie main" > /etc/apt/sources.list.d/php.list \
-    && apt-get update \
+    && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         mariadb-client \
         msmtp \
@@ -27,8 +27,12 @@ RUN apt-get update \
         "php${PHP_VERSION}-xml" \
         "php${PHP_VERSION}-zip" \
         php-memcached \
+        nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
+    \
+    && npm install --unsafe-perm -g node-sass \
+    && chown -R nobody:www-data /usr/lib/node_modules/node-sass \
     \
     && mkdir /run/php \
     && sed -i -e 's|^;\{0,1\}error_log =.*$|error_log = /proc/self/fd/2|' "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
