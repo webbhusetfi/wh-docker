@@ -9,6 +9,7 @@ RUN apt-get update \
         apt-transport-https \
         ca-certificates \
         curl \
+    && echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list \
     && curl -fSL "https://packages.sury.org/php/apt.gpg" -o "/etc/apt/trusted.gpg.d/php.gpg" \
     && echo "deb https://packages.sury.org/php/ jessie main" > /etc/apt/sources.list.d/php.list \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
@@ -28,6 +29,7 @@ RUN apt-get update \
         "php${PHP_VERSION}-zip" \
         php-memcached \
         nodejs \
+    && apt-get -t jessie-backports install --no-install-recommends --no-install-suggests -y certbot \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
     \
@@ -36,14 +38,14 @@ RUN apt-get update \
     \
     && mkdir /run/php \
     && sed -i -e 's|^;\{0,1\}error_log =.*$|error_log = /proc/self/fd/2|' "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
-    && echo 'include=/var/www/${HOSTNAME}/conf/php-fpm.conf' >> "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
+    && echo 'include=/var/www/${HOSTNAME}/conf/php/php-fpm.conf' >> "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf" \
     \
     && echo '#!/bin/bash' > /usr/local/sbin/run-php-fpm.sh \
-    && echo 'if [ ! -d /var/www/${HOSTNAME}/conf ]; then' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo '    mkdir -p /var/www/${HOSTNAME}/conf' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -d /var/www/${HOSTNAME}/conf/php ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    mkdir -p /var/www/${HOSTNAME}/conf/php' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo 'if [ ! -s /var/www/${HOSTNAME}/conf/php-fpm.conf ]; then' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo '    cat <<EOT >> /var/www/${HOSTNAME}/conf/php-fpm.conf' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -s /var/www/${HOSTNAME}/conf/php/php-fpm.conf ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    cat <<EOT >> /var/www/${HOSTNAME}/conf/php/php-fpm.conf' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'user = ${USER_ID}' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'group = ${GROUP_ID}' >> /usr/local/sbin/run-php-fpm.sh \
     && echo '' >> /usr/local/sbin/run-php-fpm.sh \
@@ -69,12 +71,12 @@ RUN apt-get update \
     && echo 'php_admin_flag[display_errors] = ${PHP_DISPLAY_ERRORS}' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'php_admin_flag[log_errors] = ${PHP_LOG_ERRORS}' >> /usr/local/sbin/run-php-fpm.sh \
     && echo '' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo 'php_admin_value[sendmail_path] = /usr/bin/msmtp -C /var/www/${HOSTNAME}/conf/msmtprc -t -i' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'php_admin_value[sendmail_path] = /usr/bin/msmtp -C /var/www/${HOSTNAME}/conf/php/msmtprc -t -i' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'EOT' >> /usr/local/sbin/run-php-fpm.sh \
     && echo '' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo 'if [ ! -f /var/www/${HOSTNAME}/conf/msmtprc ]; then' >> /usr/local/sbin/run-php-fpm.sh \
-    && echo '    touch /var/www/${HOSTNAME}/conf/msmtprc' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo 'if [ ! -f /var/www/${HOSTNAME}/conf/php/msmtprc ]; then' >> /usr/local/sbin/run-php-fpm.sh \
+    && echo '    touch /var/www/${HOSTNAME}/conf/php/msmtprc' >> /usr/local/sbin/run-php-fpm.sh \
     && echo 'fi' >> /usr/local/sbin/run-php-fpm.sh \
     && echo "exec php-fpm${PHP_VERSION} -F" >> /usr/local/sbin/run-php-fpm.sh \
     && chmod +x /usr/local/sbin/run-php-fpm.sh
