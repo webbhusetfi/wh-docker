@@ -14,18 +14,18 @@ RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib n
         -e 's/worker_processes .*$/worker_processes ${NGINX_WORKER_PROCESSES};/' \
         -e 's/worker_connections .*$/worker_connections ${NGINX_WORKER_CONNECTIONS};/' \
         -e 's/\(# \)\?multi_accept .*$/multi_accept ${NGINX_MULTI_ACCEPT};/' \
-        -e 's|/etc/nginx/sites-enabled/\*|/var/www/${HOSTNAME}/conf/nginx.conf|' \
+        -e 's|/etc/nginx/sites-enabled/\*|/var/www/${HOSTNAME}/conf/nginx/nginx.conf|' \
         "/etc/nginx/nginx.conf.template" \
     && rm /etc/nginx/sites-enabled/default \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     \
     && echo '#!/bin/bash' > /usr/local/sbin/run-nginx.sh \
-    && echo 'if [ ! -d /var/www/${HOSTNAME}/conf ]; then' >> /usr/local/sbin/run-nginx.sh \
-    && echo '    mkdir -p /var/www/${HOSTNAME}/conf' >> /usr/local/sbin/run-nginx.sh \
+    && echo 'if [ ! -d /var/www/${HOSTNAME}/conf/nginx ]; then' >> /usr/local/sbin/run-nginx.sh \
+    && echo '    mkdir -p /var/www/${HOSTNAME}/conf/nginx' >> /usr/local/sbin/run-nginx.sh \
     && echo 'fi' >> /usr/local/sbin/run-nginx.sh \
-    && echo 'if [ ! -f /var/www/${HOSTNAME}/conf/nginx.conf ]; then' >> /usr/local/sbin/run-nginx.sh \
-    && echo '    touch /var/www/${HOSTNAME}/conf/nginx.conf' >> /usr/local/sbin/run-nginx.sh \
+    && echo 'if [ ! -f /var/www/${HOSTNAME}/conf/nginx/nginx.conf ]; then' >> /usr/local/sbin/run-nginx.sh \
+    && echo '    touch /var/www/${HOSTNAME}/conf/nginx/nginx.conf' >> /usr/local/sbin/run-nginx.sh \
     && echo 'fi' >> /usr/local/sbin/run-nginx.sh \
     && echo 'use="\$HOSTNAME \$USER_ID \$GROUP_ID \$NGINX_WORKER_PROCESSES \$NGINX_WORKER_CONNECTIONS \$NGINX_MULTI_ACCEPT"' >> /usr/local/sbin/run-nginx.sh \
     && echo 'envsubst "$use" < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf' >> /usr/local/sbin/run-nginx.sh \
