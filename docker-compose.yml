@@ -3,6 +3,7 @@ services:
     wh-php:
         build: wh-php
         image: wh-php
+        restart: always
         environment:
             - USER_ID=${USER_ID:-www-data}
             - GROUP_ID=${GROUP_ID:-www-data}
@@ -37,6 +38,7 @@ services:
     wh-nginx:
         build: wh-nginx
         image: wh-nginx
+        restart: always
         environment:
             - USER_ID=${USER_ID:-www-data}
             - GROUP_ID=${GROUP_ID:-www-data}
@@ -56,6 +58,7 @@ services:
     #wh-apache:
         #build: wh-apache
         #image: wh-apache
+        #restart: always
         #environment:
             #- USER_ID=${USER_ID:-www-data}
             #- GROUP_ID=${GROUP_ID:-www-data}
