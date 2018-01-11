@@ -2,7 +2,7 @@ FROM debian:jessie-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
-ARG PHP_VERSION="7.1"
+ARG PHP_VERSION="7.2"
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
@@ -35,6 +35,8 @@ RUN apt-get update \
     \
     && npm install --unsafe-perm -g node-sass \
     && chown -R nobody:www-data /usr/lib/node_modules/node-sass \
+    \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     \
     && mkdir /run/php \
     && sed -i -e 's|^;\{0,1\}error_log =.*$|error_log = /proc/self/fd/2|' "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
@@ -106,7 +108,9 @@ ENV HOSTNAME=default \
     PHP_UPLOAD_MAX_FILESIZE=10M \
     \
     PHP_DISPLAY_ERRORS=Off \
-    PHP_LOG_ERRORS=On
+    PHP_LOG_ERRORS=On \
+    \
+    COMPOSER_ALLOW_SUPERUSER=1
 
 EXPOSE ${FPM_PORT}
 CMD ["run-php-fpm.sh"]
