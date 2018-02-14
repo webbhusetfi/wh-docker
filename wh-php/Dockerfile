@@ -14,24 +14,31 @@ RUN apt-get update \
     && echo "deb https://packages.sury.org/php/ jessie main" > /etc/apt/sources.list.d/php.list \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
+        "php${PHP_VERSION}" \
+        php-curl \
+        php-fpm \
+        php-gd \
+        php-mbstring \
+        php-mysql \
+        php-soap \
+        php-xml \
+        php-zip \
+        php-memcached \
         mariadb-client \
         msmtp \
         rsync \
         openssh-client \
-        "php${PHP_VERSION}" \
-        "php${PHP_VERSION}-curl" \
-        "php${PHP_VERSION}-fpm" \
-        "php${PHP_VERSION}-gd" \
-        "php${PHP_VERSION}-mbstring" \
-        "php${PHP_VERSION}-mysql" \
-        "php${PHP_VERSION}-soap" \
-        "php${PHP_VERSION}-xml" \
-        "php${PHP_VERSION}-zip" \
-        php-memcached \
         nodejs \
+        locales \
     && apt-get -t jessie-backports install --no-install-recommends --no-install-suggests -y certbot \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
+    \
+    && ln -s /etc/locale.alias /usr/share/locale/locale.alias \
+    && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
+    && echo 'sv_FI.UTF-8 UTF-8' >> /etc/locale.gen \
+    && echo 'fi_FI.UTF-8 UTF-8' >> /etc/locale.gen \
+    && locale-gen \
     \
     && npm install --unsafe-perm -g node-sass \
     && chown -R nobody:www-data /usr/lib/node_modules/node-sass \
