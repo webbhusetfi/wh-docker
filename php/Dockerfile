@@ -1,4 +1,4 @@
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
@@ -8,10 +8,11 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         apt-transport-https \
         ca-certificates \
+        gnupg \
         curl \
-    && echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list \
+    && echo "deb http://httpredir.debian.org/debian stretch-backports main contrib non-free" >> /etc/apt/sources.list \
     && curl -fSL "https://packages.sury.org/php/apt.gpg" -o "/etc/apt/trusted.gpg.d/php.gpg" \
-    && echo "deb https://packages.sury.org/php/ jessie main" > /etc/apt/sources.list.d/php.list \
+    && echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php.list \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         "php${PHP_VERSION}" \
@@ -30,11 +31,10 @@ RUN apt-get update \
         openssh-client \
         nodejs \
         locales \
-    && apt-get -t jessie-backports install --no-install-recommends --no-install-suggests -y certbot \
+    && apt-get -t stretch-backports install --no-install-recommends --no-install-suggests -y certbot \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
     \
-    && ln -s /etc/locale.alias /usr/share/locale/locale.alias \
     && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'sv_FI.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'fi_FI.UTF-8 UTF-8' >> /etc/locale.gen \

@@ -1,10 +1,10 @@
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
-RUN echo "deb http://httpredir.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list \
+RUN echo "deb http://httpredir.debian.org/debian stretch-backports main contrib non-free" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get -t jessie-backports install --no-install-recommends --no-install-suggests -y nginx-full gettext-base \
+    && apt-get -t stretch-backports install --no-install-recommends --no-install-suggests -y nginx-full gettext-base \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     \
