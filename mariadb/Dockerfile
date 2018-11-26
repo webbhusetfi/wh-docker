@@ -23,10 +23,10 @@ RUN set -ex; \
                             keyserver.ubuntu.com \
                             hkp://keyserver.ubuntu.com:80 \
                             pgp.mit.edu) ; do \
-        gpg --keyserver "$server" --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && break || : ; \
+        gpg --no-tty --keyserver "$server" --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && break || : ; \
     done; \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-    rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+    rm -r /usr/local/bin/gosu.asc; \
     \
     chmod +x /usr/local/bin/gosu; \
 # verify that the binary works
@@ -65,10 +65,9 @@ ENV GPG_KEYS \
 RUN set -ex; \
     export GNUPGHOME="$(mktemp -d)"; \
     for key in $GPG_KEYS; do \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+        gpg --no-tty --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
     done; \
-    gpg --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mariadb.gpg; \
-    rm -r "$GNUPGHOME"; \
+    gpg --no-tty --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mariadb.gpg; \
     apt-key list
 
 # add Percona's repo for xtrabackup (which is useful for Galera)
@@ -80,7 +79,7 @@ RUN echo "deb https://repo.percona.com/apt stretch main" > /etc/apt/sources.list
     } > /etc/apt/preferences.d/percona
 
 ENV MARIADB_MAJOR 10.3
-ENV MARIADB_VERSION 1:10.3.10+maria~stretch
+ENV MARIADB_VERSION 1:10.3.11+maria~stretch
 
 RUN echo "deb http://ftp.osuosl.org/pub/mariadb/repo/$MARIADB_MAJOR/debian stretch main" > /etc/apt/sources.list.d/mariadb.list \
     && { \
