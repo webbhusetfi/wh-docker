@@ -16,14 +16,14 @@ RUN apt-get update \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         "php${PHP_VERSION}" \
-        php-curl \
-        php-fpm \
-        php-gd \
-        php-mbstring \
-        php-mysql \
-        php-soap \
-        php-xml \
-        php-zip \
+        "php${PHP_VERSION}-curl" \
+        "php${PHP_VERSION}-fpm" \
+        "php${PHP_VERSION}-gd" \
+        "php${PHP_VERSION}-mbstring" \
+        "php${PHP_VERSION}-mysql" \
+        "php${PHP_VERSION}-soap" \
+        "php${PHP_VERSION}-xml" \
+        "php${PHP_VERSION}-zip" \
         php-memcached \
         mariadb-client \
         msmtp \
