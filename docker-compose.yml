@@ -1,6 +1,7 @@
 version: "3"
 services:
     nginx:
+        container_name: ${CONTAINER_GROUP:-desky}_nginx
         build: nginx
         image: nginx
         restart: always
@@ -21,6 +22,7 @@ services:
             default:
                 ipv4_address: ${SUBNET_RANGE}.2
     php:
+        container_name: ${CONTAINER_GROUP:-desky}_php
         build: php
         image: php
         restart: always
@@ -54,6 +56,7 @@ services:
             default:
                 ipv4_address: ${SUBNET_RANGE}.3
     mariadb:
+        container_name: ${CONTAINER_GROUP:-desky}_mariadb
         build: mariadb
         image: mariadb
         restart: always
