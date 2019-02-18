@@ -2,7 +2,7 @@ FROM debian:stretch-slim
 
 MAINTAINER Kim Wistbacka <kim.wistbacka@gmail.com>
 
-ARG PHP_VERSION="7.2"
+ARG PHP_VERSION="7.3"
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
@@ -24,6 +24,8 @@ RUN apt-get update \
         "php${PHP_VERSION}-soap" \
         "php${PHP_VERSION}-xml" \
         "php${PHP_VERSION}-zip" \
+        "php${PHP_VERSION}-bcmath" \
+        php-redis \
         php-memcached \
         mariadb-client \
         msmtp \
