@@ -158,8 +158,8 @@ EOSQL
             echo "CREATE DATABASE IF NOT EXISTS \`$table\` ;" | "${mysql[@]}"
             import=("${mysql[@]}" "$table")
             case "$f" in
-                *.sql)    echo "Importing $f"; cat "$f" | "${import[@]}"; echo ;;
-                *.sql.gz) echo "Importing $f"; gunzip -c "$f" | "${import[@]}"; echo ;;
+                *.sql)    echo "Importing $f"; cat "$f" | sed 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | "${import[@]}"; echo ;;
+                *.sql.gz) echo "Importing $f"; gunzip -c "$f" | sed 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | "${import[@]}"; echo ;;
                 *)        echo "Ignoring $f" ;;
             esac
             echo "GRANT ALL ON \`$table\`.* TO '$MYSQL_USER'@'%' ;" | "${mysql[@]}"
