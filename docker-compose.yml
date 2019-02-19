@@ -23,7 +23,6 @@ services:
             - ${HOST_PATH}/dumps:/dumps
         #ports:
             #- "3306:3306"
-            #- "3306:3306"
         networks:
             default:
                 ipv4_address: ${PROJECT_SUBNET}.4
