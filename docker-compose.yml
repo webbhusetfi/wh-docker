@@ -35,7 +35,7 @@ services:
             - USER_ID=${USER_ID:-www-data}
             - GROUP_ID=${GROUP_ID:-www-data}
             - HOSTNAME=host
-            - FPM_LISTEN_ALLOWED_CLIENTS=nginx
+            - FPM_LISTEN_ALLOWED_CLIENTS=${PROJECT_SUBNET}.2
             - FPM_HOST=${FPM_HOST:-0.0.0.0}
             - FPM_PORT=${FPM_HOST:-9000}
             - FPM_CATCH_WORKER_OUTPUT=${FPM_CATCH_WORKER_OUTPUT:-yes}
