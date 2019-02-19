@@ -18,8 +18,7 @@ RUN set -ex; \
     \
 # verify the signature
     export GNUPGHOME="$(mktemp -d)"; \
-    for server in $(shuf -e ha.pool.sks-keyservers.net \
-                            hkp://p80.pool.sks-keyservers.net:80 \
+    for server in $(shuf -e ipv4.pool.sks-keyservers.net \
                             keyserver.ubuntu.com \
                             hkp://keyserver.ubuntu.com:80 \
                             pgp.mit.edu) ; do \
@@ -65,7 +64,7 @@ ENV GPG_KEYS \
 RUN set -ex; \
     export GNUPGHOME="$(mktemp -d)"; \
     for key in $GPG_KEYS; do \
-        gpg --no-tty --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+        gpg --no-tty --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key"; \
     done; \
     gpg --no-tty --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mariadb.gpg; \
     apt-key list
