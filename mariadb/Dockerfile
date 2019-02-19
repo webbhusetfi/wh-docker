@@ -79,7 +79,7 @@ RUN echo "deb https://repo.percona.com/apt stretch main" > /etc/apt/sources.list
     } > /etc/apt/preferences.d/percona
 
 ENV MARIADB_MAJOR 10.3
-ENV MARIADB_VERSION 1:10.3.11+maria~stretch
+ENV MARIADB_VERSION 1:10.3.12+maria~stretch
 
 RUN echo "deb http://ftp.osuosl.org/pub/mariadb/repo/$MARIADB_MAJOR/debian stretch main" > /etc/apt/sources.list.d/mariadb.list \
     && { \
