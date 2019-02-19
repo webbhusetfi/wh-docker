@@ -9,7 +9,7 @@ ENV GOSU_VERSION 1.10
 RUN set -ex; \
     \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates apt-transport-https wget dirmngr gnupg pwgen; \
+    apt-get install -y --no-install-recommends ca-certificates apt-transport-https wget dirmngr gnupg pwgen dos2unix; \
     rm -rf /var/lib/apt/lists/*; \
     \
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -120,7 +120,8 @@ RUN { \
 VOLUME /var/lib/mysql
 
 COPY entrypoint.sh /usr/local/sbin/
-RUN chmod +x /usr/local/sbin/entrypoint.sh
+RUN chmod +x /usr/local/sbin/entrypoint.sh \
+    && dos2unix /usr/local/sbin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
 EXPOSE 3306
