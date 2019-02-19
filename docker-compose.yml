@@ -21,6 +21,9 @@ services:
         volumes:
             - ${HOST_PATH}/mysql:/var/lib/mysql
             - ${HOST_PATH}/dumps:/dumps
+        #ports:
+            #- "3306:3306"
+            #- "3306:3306"
         networks:
             default:
                 ipv4_address: ${PROJECT_SUBNET}.4
@@ -78,6 +81,9 @@ services:
             - ${LIB_PATH}:/var/www/lib
         depends_on: 
             - php
+        #ports:
+            #- "80:80"
+            #- "443:443"
         networks:
             default:
                 ipv4_address: ${PROJECT_SUBNET}.2
