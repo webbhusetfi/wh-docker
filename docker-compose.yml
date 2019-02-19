@@ -13,6 +13,7 @@ services:
         container_name: ${PROJECT_NAME}_mariadb
         build: mariadb
         image: mariadb
+        #command: "--innodb_use_native_aio=0 --log_bin"
         restart: always
         environment:
             - MYSQL_USER=${MYSQL_USER}
