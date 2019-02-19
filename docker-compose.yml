@@ -6,6 +6,9 @@ services:
         restart: always
         volumes:
             - ${HOST_PATH}/redis:/data
+        networks:
+            default:
+                ipv4_address: ${PROJECT_SUBNET}.5
     mariadb:
         container_name: ${PROJECT_NAME}_mariadb
         build: mariadb
@@ -18,8 +21,9 @@ services:
         volumes:
             - ${HOST_PATH}/mysql:/var/lib/mysql
             - ${HOST_PATH}/dumps:/dumps
-        depends_on: 
-            - redis
+        networks:
+            default:
+                ipv4_address: ${PROJECT_SUBNET}.4
     php:
         container_name: ${PROJECT_NAME}_php
         build: php
@@ -53,6 +57,10 @@ services:
             - ${LIB_PATH}:/var/www/lib
         depends_on: 
             - mariadb
+            - redis
+        networks:
+            default:
+                ipv4_address: ${PROJECT_SUBNET}.3
     nginx:
         container_name: ${PROJECT_NAME}_nginx
         build: nginx
@@ -70,8 +78,11 @@ services:
             - ${LIB_PATH}:/var/www/lib
         depends_on: 
             - php
+        networks:
+            default:
+                ipv4_address: ${PROJECT_SUBNET}.2
 networks:
     default:
         ipam:
             config:
-                - subnet: ${SUBNET}
+                - subnet: ${PROJECT_SUBNET}.0/24
