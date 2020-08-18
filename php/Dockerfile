@@ -13,7 +13,7 @@ RUN apt-get update \
     && echo "deb http://httpredir.debian.org/debian stretch-backports main contrib non-free" >> /etc/apt/sources.list \
     && curl -fSL "https://packages.sury.org/php/apt.gpg" -o "/etc/apt/trusted.gpg.d/php.gpg" \
     && echo "deb https://packages.sury.org/php/ stretch main" > /etc/apt/sources.list.d/php.list \
-    && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+	&& curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y  --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install \
         "php${PHP_VERSION}" \
         "php${PHP_VERSION}-curl" \
@@ -25,6 +25,8 @@ RUN apt-get update \
         "php${PHP_VERSION}-xml" \
         "php${PHP_VERSION}-zip" \
         "php${PHP_VERSION}-bcmath" \
+		ghostscript \
+		php-imagick \
         php-redis \
         php-memcached \
         mariadb-client \

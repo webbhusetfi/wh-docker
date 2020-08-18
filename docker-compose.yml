@@ -9,24 +9,24 @@ services:
         networks:
             default:
                 ipv4_address: ${PROJECT_SUBNET}.5
-    mariadb:
-        container_name: ${PROJECT_NAME}_mariadb
-        build: mariadb
-        image: mariadb
-        #command: "--innodb_use_native_aio=0 --log_bin"
-        restart: always
-        environment:
-            - MYSQL_USER=${MYSQL_USER}
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-        volumes:
-            - ${HOST_PATH}/mysql:/var/lib/mysql
-            - ${HOST_PATH}/dumps:/dumps
-        #ports:
-            #- "3306:3306"
-        networks:
-            default:
-                ipv4_address: ${PROJECT_SUBNET}.4
+#    mariadb:
+#        container_name: ${PROJECT_NAME}_mariadb
+#        build: mariadb
+#        image: mariadb
+#        #command: "--innodb_use_native_aio=0 --log_bin"
+#        restart: always
+#        environment:
+#            - MYSQL_USER=${MYSQL_USER}
+#            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+#            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#        volumes:
+#            - ${HOST_PATH}/mysql:/var/lib/mysql
+#            - ${HOST_PATH}/dumps:/dumps
+#        #ports:
+#            #- "3306:3306"
+#        networks:
+#            default:
+#                ipv4_address: ${PROJECT_SUBNET}.4
     php:
         container_name: ${PROJECT_NAME}_php
         build: php
@@ -59,7 +59,7 @@ services:
             - ${HOST_PATH}:/var/www/host
             - ${LIB_PATH}:/var/www/lib
         depends_on: 
-            - mariadb
+#            - mariadb
             - redis
         networks:
             default:
@@ -81,8 +81,8 @@ services:
             - ${LIB_PATH}:/var/www/lib
         depends_on: 
             - php
-        #ports:
-            #- "80:80"
+        ports:
+            - "80:80"
             #- "443:443"
         networks:
             default:
