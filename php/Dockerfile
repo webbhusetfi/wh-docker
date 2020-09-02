@@ -35,6 +35,8 @@ RUN apt-get update \
         openssh-client \
         nodejs \
         locales \
+        zip \
+        unzip \
     && apt-get -t stretch-backports install --no-install-recommends --no-install-suggests -y certbot \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 2>/dev/null \
