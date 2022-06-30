@@ -1,88 +1,92 @@
-version: "3"
+version: "3.5"
 services:
-    wh-php:
-        build: wh-php
-        image: wh-php
-        restart: always
-        environment:
-            - USER_ID=${USER_ID:-www-data}
-            - GROUP_ID=${GROUP_ID:-www-data}
-            - HOSTNAME=${HOSTNAME}
-            - FPM_LISTEN_ALLOWED_CLIENTS=${SUBNET_RANGE}.3
-            - FPM_HOST=${FPM_HOST:-0.0.0.0}
-            - FPM_PORT=${FPM_HOST:-9000}
-            - FPM_CATCH_WORKER_OUTPUT=${FPM_CATCH_WORKER_OUTPUT:-yes}
-            - FPM_SECURITY_LIMIT_EXTENSIONS=${FPM_SECURITY_LIMIT_EXTENSIONS:-.php}
-            - FPM_PM=${FPM_PM:-static}
-            - FPM_PM_START_SERVERS=${FPM_PM_START_SERVERS:-10}
-            - FPM_PM_MAX_CHILDREN=${FPM_PM_MAX_CHILDREN:-10}
-            - FPM_PM_MIN_SPARE_SERVERS=${FPM_PM_MIN_SPARE_SERVERS:-1}
-            - FPM_PM_MAX_SPARE_SERVERS=${FPM_PM_MAX_SPARE_SERVERS:-3}
-            - FPM_PM_MAX_REQUESTS=${FPM_PM_MAX_REQUESTS:-1000}
-            - FPM_PM_STATUS_PATH=${FPM_PM_STATUS_PATH:-/fpm-status}
-            - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-30}
-            - PHP_MAX_INPUT_TIME=${PHP_MAX_INPUT_TIME:-60}
-            - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-64M}
-            - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-10M}
-            - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-10M}
-            - PHP_DISPLAY_ERRORS=${PHP_DISPLAY_ERRORS:-Off}
-            - PHP_LOG_ERRORS=${PHP_LOG_ERRORS:-On}
-        extra_hosts:
-            - "wh-db:${DB_HOST}"
-        volumes:
-            - ${HOST_PATH}:/var/www/${HOSTNAME}
-            - ${LIB_PATH}:/var/www/lib
-        networks:
-            default:
-                ipv4_address: ${SUBNET_RANGE}.2
-    wh-nginx:
-        build: wh-nginx
-        image: wh-nginx
-        restart: always
-        environment:
-            - USER_ID=${USER_ID:-www-data}
-            - GROUP_ID=${GROUP_ID:-www-data}
-            - HOSTNAME=${HOSTNAME}
-            - NGINX_WORKER_PROCESSES=${NGINX_WORKER_PROCESSES:-auto}
-            - NGINX_WORKER_CONNECTIONS=${NGINX_WORKER_CONNECTIONS:-1024}
-            - NGINX_MULTI_ACCEPT=${NGINX_MULTI_ACCEPT:-on}
-        ports:
-            - "${HOST_IP:-0.0.0.0}:${HOST_PORT:-80}:80"
-            - "${HOST_IP:-0.0.0.0}:${HOST_PORT:-443}:443"
-        volumes:
-            - ${HOST_PATH}:/var/www/${HOSTNAME}
-            - ${LIB_PATH}:/var/www/lib
-        networks:
-            default:
-                ipv4_address: ${SUBNET_RANGE}.3
-    #wh-apache:
-        #build: wh-apache
-        #image: wh-apache
-        #restart: always
-        #environment:
-            #- USER_ID=${USER_ID:-www-data}
-            #- GROUP_ID=${GROUP_ID:-www-data}
-            #- HOSTNAME=${HOSTNAME}
-            #- APACHE_START_SERVERS=${APACHE_START_SERVERS:-2}
-            #- APACHE_MIN_SPARE_SERVERS=${APACHE_MIN_SPARE_SERVERS:-25}
-            #- APACHE_MAX_SPARE_SERVERS=${APACHE_MAX_SPARE_SERVERS:-75}
-            #- APACHE_THREADLIMIT=${APACHE_THREADLIMIT:-64}
-            #- APACHE_THREADS_PER_CHILD=${APACHE_THREADS_PER_CHILD:-25}
-            #- APACHE_MAX_REQUEST_WORKERS=${APACHE_MAX_REQUEST_WORKERS:-150}
-            #- APACHE_MAX_CONNECTIONS_PER_CHILD=${APACHE_MAX_CONNECTIONS_PER_CHILD:-0}
-            #- APACHE_FPM_HOST=${APACHE_FPM_HOST:-wh-php}
-            #- APACHE_FPM_PORT=${APACHE_FPM_PORT:-9000}
-        #ports:
-            #- "${HOST_IP:-0.0.0.0}:${HOST_PORT:-80}:80"
-            #- "${HOST_IP:-0.0.0.0}:${HOST_PORT:-443}:443"
-        #volumes:
-            #- ${HOST_PATH}:/var/www/${HOSTNAME}
-            #- ${LIB_PATH}:/var/www/lib
-        #networks:
-            #default:
-                #ipv4_address: ${SUBNET_RANGE}.3
+  ## --------------------------------------------
+  ## | PHP
+  ## --------------------------------------------
+
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ${PATH_TO_WEBBHUSSET}:/var/www/webbhuset.fi
+      - ${PATH_TO_LIB}:/var/www/lib
+      # - ./php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./symlinks.sh:/var/www/symlinks.sh
+    container_name: wh-php
+    working_dir: /var/www
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    networks:
+      - wh
+
+  ## --------------------------------------------
+  ## | Nginx
+  ## --------------------------------------------
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: wh-nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8088:80"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${PATH_TO_WEBBHUSSET}:/var/www/webbhuset.fi
+      - ${PATH_TO_LIB}:/var/www/lib
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./symlinks.sh:/var/www/symlinks.sh
+    networks:
+      - wh
+
+  ## --------------------------------------------
+  ## | MySql
+  ## --------------------------------------------
+
+  mysql:
+    image: mysql:8.0.25
+    container_name: wh-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "wh"
+    command: --sql_mode=""
+    restart: always
+    volumes:
+      - ./mysql/mysql-data:/var/lib/mysql
+      - ./mysql/tmp:/mysql-tmp
+    ports:
+      - "33066:3306"
+    networks:
+      - wh
+
+  ## --------------------------------------------
+  ## | PhpMyAdmin
+  ## --------------------------------------------
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wh-phpmyadmin
+    depends_on:
+      - mysql
+    ports:
+      - "23005:80"
+    environment:
+      - PMA_HOST=wh-mysql
+    volumes:
+      - ./phpmyadmin/save/:/var/www/phpmyadmin/save/
+      - ./phpmyadmin/upload/:/var/www/phpmyadmin/upload/
+      - ./phpmyadmin/config.php:/etc/phpmyadmin/config.user.inc.php
+    networks:
+      - wh
+
 networks:
-    default:
-        ipam:
-            config:
-                - subnet: ${SUBNET}
+  wh:
+    driver: bridge
