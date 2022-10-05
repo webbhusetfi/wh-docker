@@ -1,20 +1,33 @@
-# Running locally
+# Setup for development
+Assume working directory is `~/webbhuset`
+1. Clone `wh-docker` repo and switch to `localdev` branch
+2. Run `./resynch.sh`. Which wil create `/lib` and `/webbhuset.fi` ourside `wh-docker` with repos.
+    - Change below in `/webbhuset.fi/config/nginx.conf` (untill we fix)
+         ```sh
+         upstream fastcgi_backend {
+            server 127.0.0.1:9000;
+        }
+       ```
+       to 
+       ```sh
+         upstream fastcgi_backend {
+            server wh-php:9000;
+        }
+       ```
+   - Also make database changes in `/lib/DS/app/config.php` (Check tips below.)
 
-# Create the following folder structure
+3. Add `/demo.webbhuset.fi` (and other if required) to host file.
+4. Run the echo command to start the container stack.
+5. Goto `https://demo.webbhuset.fi`.
 
-```sh
-├── lib
-├── webbhuset.fi
-└── wh-docker
-```
+###### Tips:
+- ##### importnant: Wait for the initial databases import to finish.
+- Change `/lib/DS/app/config.php` to use docker container names for database.
+- Use  `root` for database user in `/lib/DS/app/config.php`
+- Use `root` as username and password for `ds` from `/lib/DS/app/config.php` for phpmyadmin.
+- Add the `./resynch.sh` output paths to `.env` file inside `wh-docker` for easiness
 
-- Inside `wh-docker` is the Docker repository
-
-- Inside `lib` is the DS and other repositry
-
-- Inside `webbhuset.fi` is Configs and Sites from production server
-
-so after cloning all repos and copying `webbhuset.fi` using `resynch.sh` the folder structure will be something like:
+#### Final folder structure
 
 ```sh
 .
@@ -40,28 +53,4 @@ so after cloning all repos and copying `webbhuset.fi` using `resynch.sh` the fol
     ├── singlesite.sh
     └── symlinks.sh
 ```
-
-- Then `cd wh-docker` 
-- Run `docker-compose up --build`
-
-# Prerequisites 
-- A mysqldump from database
-- Adding sites from 
-
-    ```
-    webbhuset.fi
-    ├── conf
-    └── sites
-        ├── auf.webbhuset.fi
-        └── sa.webbhuset.fi
-    ```
-    to the local machine hosts.
-- checking `/webbhuset/sites` incluse `.nginx.map`
-
-- check that `webbhuset/conf/nginx/server` directory is empty to by pass SSL locally
-
-- define local database connection in DS
-    - currently from `/lib/DS/.env`
-
-
-open the websites like `auf.webbhuset.fi`
+Happy coding.

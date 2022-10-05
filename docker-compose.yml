@@ -51,7 +51,7 @@ services:
   ## --------------------------------------------
 
   mysql:
-    image: mysql:8.0.25
+    image: mysql:8.0.30
     container_name: wh-mysql
     environment:
       MYSQL_ROOT_PASSWORD: "123456"
@@ -60,7 +60,7 @@ services:
     restart: always
     volumes:
       - ./mysql/mysql-data:/var/lib/mysql
-      - ./mysql/tmp:/mysql-tmp
+      - ./mysql/tmp:/docker-entrypoint-initdb.d
     ports:
       - "33066:3306"
     networks:
