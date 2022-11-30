@@ -31,9 +31,11 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     libmagickwand-dev \
     libmagickcore-dev \
     wget \
+    goaccess \
     && echo "upload_max_filesize = 8M" > /usr/local/etc/php/conf.d/upload.ini \
-    && docker-php-ext-install exif intl pdo_mysql bcmath pcntl soap \
+    && docker-php-ext-install exif intl pdo_mysql bcmath pcntl soap calendar \
     && docker-php-ext-configure zip \
+    && docker-php-ext-configure calendar --enable-calendar \
     && docker-php-ext-configure gd --with-jpeg --with-freetype &&  \
     docker-php-ext-install gd zip
 
@@ -45,6 +47,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 
 # RUN sed -i 's/127.0.0.1:9000/0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
 
+RUN mkdir /var/log/nginx/
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
 

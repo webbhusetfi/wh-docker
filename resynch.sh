@@ -26,6 +26,7 @@ done
 rsync -az -e "ssh $PRIVATEKEY -p $SOURCEPORT" --progress --delete --rsync-path="sudo rsync" ${SOURCE}:/var/www/webbhuset.fi/conf ${TARGETDIR}/webbhuset.fi --exclude=conf/cron
 rsync -az -e "ssh $PRIVATEKEY -p $SOURCEPORT" --progress --delete ${SOURCE}:/var/www/webbhuset.fi/sites/.nginx.map ${TARGETDIR}/webbhuset.fi/sites/.nginx.map
 rsync -az -e "ssh  $PRIVATEKEY -p $SOURCEPORT" --progress --delete ${SOURCE}:/var/www/lib/DS/app/config.php ${TARGETDIR}/lib/DS/app/config.php
+rsync -az -e "ssh  $PRIVATEKEY -p $SOURCEPORT" --progress --delete ${SOURCE}:/var/www/lib/DS/app/googleapiprivatekey.p12 ${TARGETDIR}/lib/DS/app/googleapiprivatekey.p12
 
 for i in $INCLUDESITES $MORESITES; do
  rsync -az -e "ssh $PRIVATEKEY -p $SOURCEPORT" --progress --delete ${SOURCE}:/var/www/webbhuset.fi/sites/${i}/ ${TARGETDIR}/webbhuset.fi/sites/${i}
